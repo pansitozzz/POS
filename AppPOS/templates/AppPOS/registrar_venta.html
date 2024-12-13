@@ -1,0 +1,203 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Ventas</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Registrar Venta</h1>
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="direccion_cliente">Cliente</label>
+                <input type="text" id="cliente" name="cliente" required placeholder="Ingresa la dirección del cliente">
+            </div>
+            
+            <!-- Campo para dirección del cliente -->
+            <div class="form-group">
+                <label for="direccion_cliente">Dirección del Cliente</label>
+                <input type="text" id="direccion_cliente" name="direccion_cliente" required placeholder="Ingresa la dirección del cliente">
+            </div>
+
+            <!-- Campo para seleccionar producto -->
+            <div class="form-group">
+                <label for="productoSelect">Producto</label>
+                <select id="productoSelect" name="producto" required>
+                    <option value="" disabled selected>Selecciona un producto</option>
+                    {% for producto in productos %}
+                        <option value="{{ producto.id }}" data-precio="{{ producto.precio }}" data-stock="{{ producto.cantidad }}">
+                            {{ producto.nombre }} (Stock: {{ producto.cantidad }} - Precio: {{ producto.precio }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Campo para cantidad -->
+            <div class="form-group">
+                <label for="cantidadInput">Cantidad</label>
+                <input type="number" id="cantidadInput" name="cantidad" min="1" required>
+            </div>
+
+            <!-- Campo para mostrar el precio total calculado -->
+            <div id="precioTotalContainer" style="display: none;">
+                <div class="form-group">
+                    <label for="precioTotal">Precio Total</label>
+                    <input type="text" id="precioTotal" name="precio_total" readonly>
+                    <input type="hidden" id="precioTotalHidden" name="precio_total_hidden">
+                </div>
+            </div>
+
+            <button type="submit">Registrar Venta</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const productoSelect = document.getElementById('productoSelect');
+            const cantidadInput = document.getElementById('cantidadInput');
+            const precioTotalContainer = document.getElementById('precioTotalContainer');
+            const precioTotal = document.getElementById('precioTotal');
+            const precioTotalHidden = document.getElementById('precioTotalHidden');
+
+            // Función para actualizar el precio total
+            function actualizarPrecioTotal() {
+                const productoSeleccionado = productoSelect.selectedOptions[0];
+                const precio = parseFloat(productoSeleccionado.getAttribute('data-precio'));
+                const cantidad = parseInt(cantidadInput.value);
+
+                // Solo calcular si la cantidad y el producto son válidos
+                if (productoSeleccionado.value && cantidad && !isNaN(precio)) {
+                    const precioFinal = precio * cantidad;
+                    precioTotal.value = precioFinal.toFixed(2);
+                    precioTotalHidden.value = precioFinal.toFixed(2);  // Asigna el valor al campo oculto
+                    precioTotalContainer.style.display = 'block';
+                } else {
+                    precioTotalContainer.style.display = 'none';
+                }
+            }
+
+            // Evento para actualizar precio cuando se cambia el producto o cantidad
+            productoSelect.addEventListener('change', actualizarPrecioTotal);
+            cantidadInput.addEventListener('input', actualizarPrecioTotal);
+        });
+    </script>
+
+    <style>
+        /* Estilo global */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Contenedor principal */
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background-color: #fff;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        /* Encabezado */
+        h1 {
+            background-color: #6a0dad;
+            color: #fff;
+            text-align: center;
+            padding: 15px;
+            margin: 0 -20px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        /* Formularios */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input,
+        select,
+        button {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 25px;
+            box-sizing: border-box;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #6a0dad;
+            outline: none;
+        }
+
+        /* Botón */
+        button {
+            background-color: #6a0dad;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #520d7f;
+        }
+
+        /* Mensajes */
+        .alert {
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .alert.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Botón de enlace */
+        a.button {
+            display: block;
+            margin: 20px auto;
+            text-align: center;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #6a0dad;
+            color: white;
+            font-size: 14px;
+            border-radius: 25px;
+            width: fit-content;
+            transition: background-color 0.3s ease;
+        }
+
+        a.button:hover {
+            background-color: #520d7f;
+        }
+    </style>
+</body>
+</html>
